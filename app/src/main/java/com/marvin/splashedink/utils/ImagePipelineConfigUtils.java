@@ -8,7 +8,6 @@ import com.facebook.cache.disk.DiskCacheConfig;
 import com.facebook.common.disk.NoOpDiskTrimmableRegistry;
 import com.facebook.common.internal.Supplier;
 import com.facebook.common.memory.MemoryTrimType;
-import com.facebook.common.memory.MemoryTrimmable;
 import com.facebook.common.memory.NoOpMemoryTrimmableRegistry;
 import com.facebook.common.util.ByteConstants;
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;

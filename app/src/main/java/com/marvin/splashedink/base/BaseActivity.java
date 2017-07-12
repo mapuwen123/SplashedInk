@@ -1,28 +1,20 @@
 package com.marvin.splashedink.base;
 
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.marvin.splashedink.MyApplication;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.utils.ActivityUtils;
-import com.marvin.splashedink.utils.StatusUtil;
 import com.marvin.splashedink.utils.ToastUtil;
 
 import butterknife.ButterKnife;
@@ -36,10 +28,6 @@ public abstract class BaseActivity<V, P extends BasePresenter<V>> extends AppCom
 
     protected final String TAG = this.getClass().getSimpleName();
 
-    private Toolbar toolbar;
-
-    private static FrameLayout content;
-
     private Unbinder un;
 
     public P presenter;
@@ -52,49 +40,19 @@ public abstract class BaseActivity<V, P extends BasePresenter<V>> extends AppCom
         ActivityUtils.addActivity(this);
         setContentView(getLayoutId());
         un = ButterKnife.bind(this);
-        StatusUtil.getInstance(this).setStatus(StatusUtil.getSystemType());
         presenter = initPresenter();
         presenter.attach((V) this);
+        actionbarInit();
         dataInit();
         eventInit();
     }
 
     protected abstract int getLayoutId();
 
-    @Override
-    public void setContentView(@LayoutRes int layoutResID) {
-        View view = getLayoutInflater().inflate(R.layout.base_layout, null);
-        toolbar = view.findViewById(R.id.toolbar);
-        super.setContentView(view);
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
-            view.setFitsSystemWindows(true);
-        }
-
-        initDefaultView(layoutResID);
-        setSupportActionBar(toolbar);
-    }
-
-    private void initDefaultView(@LayoutRes int layoutResId) {
-        View childView = LayoutInflater.from(this).inflate(layoutResId, null);
-        content = (FrameLayout) findViewById(R.id.content);
-        content.addView(childView, 0);
-    }
-
-    public Toolbar getToolbar() {
-        return toolbar;
-    }
-
-    public void setTitle(CharSequence titleChar) {
-        toolbar.setTitle(titleChar);
-    }
-
-    public void setBack(boolean enable) {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
-        toolbar.setNavigationOnClickListener(view -> onBackPressed());
-    }
-
     // 实例化presenter
     public abstract P initPresenter();
+
+    protected abstract void actionbarInit();
 
     protected abstract void dataInit();
 
@@ -185,24 +143,6 @@ public abstract class BaseActivity<V, P extends BasePresenter<V>> extends AppCom
             win.setContentView(view);
         }
         return progress;
-    }
-
-    public static void showNetSnackbar() {
-        Snackbar.make(content, MyApplication.getContext().getString(R.string.no_net), Snackbar.LENGTH_LONG)
-                .setAction(MyApplication.getContext().getString(R.string.open_set), view -> {
-                    Intent intent=null;
-                    //判断手机系统的版本  即API大于10 就是3.0或以上版本
-                    if(Build.VERSION.SDK_INT>10){
-                        intent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
-                    }else{
-                        intent = new Intent();
-                        ComponentName component = new ComponentName("com.android.settings","com.android.settings.WirelessSettings");
-                        intent.setComponent(component);
-                        intent.setAction("android.intent.action.VIEW");
-                    }
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    MyApplication.getContext().startActivity(intent);
-                }).show();
     }
 
 }
