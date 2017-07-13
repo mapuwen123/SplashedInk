@@ -4,6 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_60">60dp</dimen>
     <dimen name="dp_230">230dp</dimen>
 
     <dimen name="popup_item_high">45dp</dimen>

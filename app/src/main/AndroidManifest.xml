@@ -3,6 +3,10 @@
     package="com.marvin.splashedink">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MyApplication"
@@ -12,6 +16,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.marvin.splashedink.utils.glide.MyGlideModule"
+            android:value="GlideModule" />
         <activity
             android:name=".ui.splash.SplashActivity"
             android:theme="@style/Sqlash">
@@ -22,7 +29,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.main.MainActivity" />
-        <activity android:name=".ui.particulars.ParticularsActivity"></activity>
+        <activity android:name=".ui.particulars.ParticularsActivity" />
+        <activity android:name=".ui.download.DownLoadActivity"></activity>
     </application>
 
 </manifest>

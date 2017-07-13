@@ -26,7 +26,8 @@ public class MainPresenter extends BasePresenter<MainView> implements Observer<L
         if (page == 1) {
             mView.showProgress();
         }
-        model.getPhotos(page, per_page).subscribeOn(Schedulers.newThread())
+        model.getPhotos(page, per_page)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this);
     }

@@ -15,8 +15,7 @@ import io.reactivex.Observable;
 
 public class MainModel {
     public Observable getPhotos(int page, int per_page) {
-        Observable<List<PhotoBean>> observable = MyApplication.retrofitService.getPhotoList(APIConfig.Application_ID
-                , page
+        Observable<List<PhotoBean>> observable = MyApplication.retrofitService.getPhotoList(page
                 , per_page);
         return observable;
     }

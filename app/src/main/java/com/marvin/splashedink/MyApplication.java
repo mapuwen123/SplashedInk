@@ -3,17 +3,12 @@ package com.marvin.splashedink;
 import android.app.Application;
 import android.content.Context;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;
-import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.marvin.splashedink.base.BaseRetrofit;
 import com.marvin.splashedink.common.BuildConfig;
 import com.marvin.splashedink.network.NetWorkService;
-import com.marvin.splashedink.utils.ImagePipelineConfigUtils;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
@@ -41,9 +36,6 @@ public class MyApplication extends Application {
                 return BuildConfig.isDebug;
             }
         });
-        // Fresco初始化
-        ImagePipelineConfig config = ImagePipelineConfigUtils.getDefaultImagePipelineConfig(this);
-        Fresco.initialize(this, config);
     }
 
     public static Context getContext() {

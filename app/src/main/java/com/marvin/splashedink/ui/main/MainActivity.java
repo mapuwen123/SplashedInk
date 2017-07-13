@@ -14,11 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.base.BaseActivity;
 import com.marvin.splashedink.bean.PhotoBean;
+import com.marvin.splashedink.ui.download.DownLoadActivity;
 import com.marvin.splashedink.ui.main.adapter.MainAdapter;
 import com.marvin.splashedink.ui.particulars.ParticularsActivity;
 
@@ -64,12 +65,13 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     protected void actionbarInit() {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(R.string.app_name);
+        toolbar.setOnMenuItemClickListener(this);
     }
 
     @Override
     protected void dataInit() {
         data = new ArrayList<>();
-        mainAdapter = new MainAdapter(R.layout.main_item, data);
+        mainAdapter = new MainAdapter(this, R.layout.main_item, data);
 
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setAdapter(mainAdapter);
@@ -89,13 +91,13 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
                 //判断RecyclerView滑动状态，滑动停止时加载图片
                 switch (newState) {
                     case RecyclerView.SCROLL_STATE_DRAGGING:
-                        Fresco.getImagePipeline().resume();
+                        Glide.with(MainActivity.this).resumeRequests();
                         break;
                     case RecyclerView.SCROLL_STATE_IDLE:
-                        Fresco.getImagePipeline().resume();
+                        Glide.with(MainActivity.this).resumeRequests();
                         break;
                     case RecyclerView.SCROLL_STATE_SETTLING:
-                        Fresco.getImagePipeline().pause();
+                        Glide.with(MainActivity.this).pauseRequests();
                         break;
                 }
             }
@@ -114,7 +116,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     public void error(String err) {
-
+        showToast(err);
     }
 
     @Override
@@ -157,7 +159,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         ActivityOptions options =
                 ActivityOptions.makeSceneTransitionAnimation(this, view, "image");
         Intent intent = new Intent(this, ParticularsActivity.class);
-        intent.putExtra("URI", data.get(position).getUrls().getRegular());
+        intent.putExtra("PHOTO_ID", data.get(position).getId());
+        intent.putExtra("IMAGE_URL", data.get(position).getUrls().getRegular());
+        intent.putExtra("HEIGHT", view.getHeight());
         startActivity(intent, options.toBundle());
     }
 
@@ -170,9 +174,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.drawload_item:
-//
-//                break;
+            case R.id.drawload_item:
+                startIntent(DownLoadActivity.class, null);
+                break;
         }
         return true;
     }
