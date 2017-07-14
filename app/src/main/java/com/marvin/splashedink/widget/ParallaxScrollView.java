@@ -6,6 +6,7 @@ import android.widget.ScrollView;
 
 /**
  * Created by Administrator on 2017/7/13.
+ * 视差滚动
  */
 
 public class ParallaxScrollView extends ScrollView {
@@ -23,6 +24,10 @@ public class ParallaxScrollView extends ScrollView {
 
     private ScrollviewListener mScrollViewListener = null;
 
+    public void setScrollViewListener(ScrollviewListener listener) {
+        this.mScrollViewListener = listener;
+    }
+
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
@@ -31,7 +36,7 @@ public class ParallaxScrollView extends ScrollView {
         }
     }
 
-    interface ScrollviewListener {
+    public interface ScrollviewListener {
         void onScrollChanged(ParallaxScrollView scrollView, int x, int y, int oldx, int oldy);
     }
 }

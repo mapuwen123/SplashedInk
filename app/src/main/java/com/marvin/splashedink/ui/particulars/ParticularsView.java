@@ -7,7 +7,7 @@ import com.marvin.splashedink.base.BaseView;
  */
 
 public interface ParticularsView extends BaseView {
-    void setImageURI(String uri);
+    void shareSuccess(String msg);
     void setAuthorHeader(String uri);
     void setAuthorName(String name);
     void setCreateTime(String time);
@@ -22,4 +22,5 @@ public interface ParticularsView extends BaseView {
     void setLikes(String likes);
     void setViews(String views);
     void setDownloads(String downloads);
+    void setDownloadUrl(String url);
 }

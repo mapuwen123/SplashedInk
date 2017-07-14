@@ -1,6 +1,10 @@
 package com.marvin.splashedink.ui.particulars;
 
+import android.app.DownloadManager;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -17,13 +21,20 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.base.BaseActivity;
+import com.marvin.splashedink.bean.DiskDownloadBean;
+import com.marvin.splashedink.common.BuildConfig;
 import com.marvin.splashedink.widget.ParallaxScrollView;
 
+import java.io.File;
+
 import butterknife.BindView;
+import io.realm.Realm;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-public class ParticularsActivity extends BaseActivity<ParticularsView, ParticularsPresenter> implements ParticularsView {
+public class ParticularsActivity extends BaseActivity<ParticularsView, ParticularsPresenter> implements ParticularsView,
+        ParallaxScrollView.ScrollviewListener,
+        View.OnClickListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -94,6 +105,8 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
     private int height = 0;
     private String image_url = "";
 
+    private ProgressDialog progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,17 +151,27 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
 
     @Override
     protected void eventInit() {
+        scroll.setScrollViewListener(this);
 
+        download.setOnClickListener(this);
+        share.setOnClickListener(this);
+        window.setOnClickListener(this);
+    }
+
+    private void showDialog() {
+        progress = new ProgressDialog(this);
+        progress.setMessage("下载准备中,请稍后...");
+        progress.show();
     }
 
     @Override
     public void showProgress() {
-
+        showDialog();
     }
 
     @Override
     public void hideProgress() {
-
+        progress.dismiss();
     }
 
     @Override
@@ -157,11 +180,8 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
     }
 
     @Override
-    public void setImageURI(String uri) {
-        Glide.with(this)
-                .load(uri)
-                .transition(withCrossFade())
-                .into(image);
+    public void shareSuccess(String msg) {
+        showToast(msg);
     }
 
     @Override
@@ -239,5 +259,50 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
     @Override
     public void setDownloads(String downloads) {
         textDownloads.setText(downloads);
+    }
+
+    @Override
+    public void setDownloadUrl(String url) {
+        File destDir = new File(BuildConfig.AppDir + "/Download");
+        if (!destDir.exists()) {// 判断文件夹是否存在
+            destDir.mkdirs();
+        }
+        DownloadManager download = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        // 通知栏中将出现的内容
+        request.setTitle(photo_id);
+        // 下载过程和下载完成后通知栏有通知消息。
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        File fileName = new File(destDir, photo_id + ".jpg");
+        request.setDestinationUri(Uri.fromFile(fileName));
+        long id = download.enqueue(request);
+        Realm.getDefaultInstance().executeTransactionAsync(realm -> {
+            DiskDownloadBean diskDownloadBean = realm.createObject(DiskDownloadBean.class);
+            diskDownloadBean.setDownload_id(id);
+            diskDownloadBean.setPhoto_id(photo_id);
+            diskDownloadBean.setUrl(url);
+            diskDownloadBean.setPath(fileName.getAbsolutePath());
+            diskDownloadBean.setPreview_url(image_url);
+        });
+    }
+
+    @Override
+    public void onScrollChanged(ParallaxScrollView scrollView, int x, int y, int oldx, int oldy) {
+        image.scrollTo(x, -y / 3);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.download:
+                presenter.getDownloadUrl(photo_id);
+                break;
+            case R.id.share:
+                presenter.shareImage(this, image_url);
+                break;
+            case R.id.window:
+
+                break;
+        }
     }
 }

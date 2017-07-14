@@ -23,7 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="来自 Bobby Stevenson"
         android:textSize="@dimen/text_appbar_size"
         android:textStyle="bold" />
 
@@ -33,7 +32,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/dp_8"
-        android:text="创作于 2017-07-13"
         android:textSize="@dimen/text_small_size" />
 
     <LinearLayout

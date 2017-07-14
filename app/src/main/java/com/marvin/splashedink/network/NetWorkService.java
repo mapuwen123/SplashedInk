@@ -1,5 +1,6 @@
 package com.marvin.splashedink.network;
 
+import com.marvin.splashedink.bean.DownLoadBean;
 import com.marvin.splashedink.bean.PhotoBean;
 import com.marvin.splashedink.bean.PhotoStatusBean;
 
@@ -21,4 +22,7 @@ public interface NetWorkService {
 
     @GET("photos/{photoId}?client_id=f7f954a8249404b33049059a8cce4b5147303f10b2089965dc0232c29d02f653")
     Observable<PhotoStatusBean> getPhotoStatus(@Path("photoId") String photoId);
+
+    @GET("photos/{photoId}/download?client_id=f7f954a8249404b33049059a8cce4b5147303f10b2089965dc0232c29d02f653")
+    Observable<DownLoadBean> getDownLoadUrl(@Path("photoId") String photoId);
 }
