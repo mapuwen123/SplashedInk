@@ -1,10 +1,9 @@
 package com.marvin.splashedink.ui.particulars;
 
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.WallpaperManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -16,21 +15,29 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.base.BaseActivity;
 import com.marvin.splashedink.bean.DiskDownloadBean;
-import com.marvin.splashedink.common.BuildConfig;
+import com.marvin.splashedink.utils.ToastUtil;
 import com.marvin.splashedink.widget.ParallaxScrollView;
 
-import java.io.File;
+import java.io.IOException;
 
 import butterknife.BindView;
+import io.reactivex.functions.Consumer;
 import io.realm.Realm;
+import zlc.season.rxdownload2.RxDownload;
 
+import static android.R.attr.bitmap;
+import static android.R.attr.id;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.umeng.socialize.utils.DeviceConfig.context;
 
 public class ParticularsActivity extends BaseActivity<ParticularsView, ParticularsPresenter> implements ParticularsView,
         ParallaxScrollView.ScrollviewListener,
@@ -107,6 +114,8 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
 
     private ProgressDialog progress;
 
+    private WallpaperManager manager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +148,8 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
         height = getIntent().getIntExtra("HEIGHT", 0);
         image_url = getIntent().getStringExtra("IMAGE_URL");
 
+        manager = WallpaperManager.getInstance(this);
+
         ViewGroup.LayoutParams params = image.getLayoutParams();
         params.height = height;
         Glide.with(this)
@@ -158,15 +169,15 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
         window.setOnClickListener(this);
     }
 
-    private void showDialog() {
+    private void showDialog(CharSequence msg) {
         progress = new ProgressDialog(this);
-        progress.setMessage("下载准备中,请稍后...");
+        progress.setMessage(msg);
         progress.show();
     }
 
     @Override
     public void showProgress() {
-        showDialog();
+        showDialog("下载准备中,请稍后...");
     }
 
     @Override
@@ -263,25 +274,16 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
 
     @Override
     public void setDownloadUrl(String url) {
-        File destDir = new File(BuildConfig.AppDir + "/Download");
-        if (!destDir.exists()) {// 判断文件夹是否存在
-            destDir.mkdirs();
-        }
-        DownloadManager download = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        // 通知栏中将出现的内容
-        request.setTitle(photo_id);
-        // 下载过程和下载完成后通知栏有通知消息。
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        File fileName = new File(destDir, photo_id + ".jpg");
-        request.setDestinationUri(Uri.fromFile(fileName));
-        long id = download.enqueue(request);
+        RxDownload.getInstance(this)
+                .serviceDownload(url, photo_id + ".jpg")
+                .subscribe((Consumer<Object>) o -> {
+                    showToast("任务已加入下载队列");
+                });
         Realm.getDefaultInstance().executeTransactionAsync(realm -> {
             DiskDownloadBean diskDownloadBean = realm.createObject(DiskDownloadBean.class);
             diskDownloadBean.setDownload_id(id);
             diskDownloadBean.setPhoto_id(photo_id);
             diskDownloadBean.setUrl(url);
-            diskDownloadBean.setPath(fileName.getAbsolutePath());
             diskDownloadBean.setPreview_url(image_url);
         });
     }
@@ -301,7 +303,22 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
                 presenter.shareImage(this, image_url);
                 break;
             case R.id.window:
-
+                showDialog("正在设置壁纸,请稍后...");
+                Glide.with(this)
+                        .asBitmap()
+                        .load(image_url)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                try {
+                                    manager.setBitmap(resource);
+                                    hideProgress();
+                                    showToast("设置完成");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                 break;
         }
     }

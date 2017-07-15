@@ -13,6 +13,7 @@ import com.umeng.socialize.PlatformConfig;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import retrofit2.Retrofit;
+import zlc.season.rxdownload2.RxDownload;
 
 /**
  * Created by Administrator on 2017/7/11.
@@ -51,6 +52,13 @@ public class MyApplication extends Application {
         PlatformConfig.setQQZone("1106288406", "bm7EXPXnKdd6mcOY");
         PlatformConfig.setSinaWeibo("3854770541", "9010e556f5e273fb95f5c3e2a95817fa", "http://sns.whalecloud.com");
         PlatformConfig.setAlipay("2017071407749552");
+
+        RxDownload.getInstance(this)
+                .retrofit(retrofit)
+                .defaultSavePath(BuildConfig.AppDir + "/Download")
+                .maxThread(3)
+                .maxRetryCount(3)
+                .maxDownloadNumber(5);
     }
 
     public static Context getContext() {

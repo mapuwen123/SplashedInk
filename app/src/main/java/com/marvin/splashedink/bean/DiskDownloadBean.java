@@ -1,7 +1,5 @@
 package com.marvin.splashedink.bean;
 
-import android.app.DownloadManager;
-
 import io.realm.RealmObject;
 
 /**

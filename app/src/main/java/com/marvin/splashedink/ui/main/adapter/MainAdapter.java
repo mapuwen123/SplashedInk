@@ -1,14 +1,13 @@
 package com.marvin.splashedink.ui.main.adapter;
 
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -18,18 +17,21 @@ import com.marvin.splashedink.R;
 import com.marvin.splashedink.bean.DiskDownloadBean;
 import com.marvin.splashedink.bean.DownLoadBean;
 import com.marvin.splashedink.bean.PhotoBean;
-import com.marvin.splashedink.common.BuildConfig;
+import com.marvin.splashedink.utils.ToastUtil;
 
-import java.io.File;
 import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import zlc.season.rxdownload2.RxDownload;
+import zlc.season.rxdownload2.entity.DownloadStatus;
 
+import static android.R.attr.id;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
@@ -92,25 +94,19 @@ public class MainAdapter extends BaseQuickAdapter<PhotoBean, BaseViewHolder> {
         public void onNext(@NonNull DownLoadBean downLoadBean) {
             progress.dismiss();
             String download_url = downLoadBean.getUrl();
-            File destDir = new File(BuildConfig.AppDir + "/Download");
-            if (!destDir.exists()) {// 判断文件夹是否存在
-                destDir.mkdirs();
-            }
-            DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(download_url));
-            // 通知栏中将出现的内容
-            request.setTitle(photo_id);
-            // 下载过程和下载完成后通知栏有通知消息。
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            File fileName = new File(destDir, photo_id + ".jpg");
-            request.setDestinationUri(Uri.fromFile(fileName));
-            long id = downloadManager.enqueue(request);
+            RxDownload.getInstance(context)
+                    .serviceDownload(download_url, photo_id + ".jpg")
+                    .subscribe((Consumer<Object>) o -> {
+                        ToastUtil.getInstance(context)
+                                .setDuration(Toast.LENGTH_SHORT)
+                                .setText("任务已加入下载队列")
+                                .show();
+                    });
             Realm.getDefaultInstance().executeTransactionAsync(realm -> {
                 DiskDownloadBean diskDownloadBean = realm.createObject(DiskDownloadBean.class);
                 diskDownloadBean.setDownload_id(id);
                 diskDownloadBean.setPhoto_id(photo_id);
                 diskDownloadBean.setUrl(download_url);
-                diskDownloadBean.setPath(fileName.getAbsolutePath());
                 diskDownloadBean.setPreview_url(preview_url);
             });
         }

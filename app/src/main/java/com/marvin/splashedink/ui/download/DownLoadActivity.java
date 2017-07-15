@@ -52,16 +52,22 @@ public class DownLoadActivity extends BaseActivity<DownLoadView, DownLoadPresent
     protected void dataInit() {
         data = new ArrayList<>();
         adapter = new DownLoadAdapter(this, R.layout.download_item, data);
+        adapter.setEmptyView(getLayoutInflater().inflate(R.layout.recycler_empty_iew, null));
+        adapter.openLoadAnimation();
 
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setAdapter(adapter);
 
-        presenter.getDiskDownloads();
+        getDiskDownloads();
     }
 
     @Override
     protected void eventInit() {
 
+    }
+
+    public void getDiskDownloads() {
+        presenter.getDiskDownloads();
     }
 
     @Override
@@ -81,6 +87,8 @@ public class DownLoadActivity extends BaseActivity<DownLoadView, DownLoadPresent
 
     @Override
     public void onUpdata(List<DiskDownloadBean> data) {
-        adapter.addData(data);
+        this.data.clear();
+        this.data.addAll(data);
+        adapter.notifyDataSetChanged();
     }
 }

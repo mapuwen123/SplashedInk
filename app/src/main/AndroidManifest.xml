@@ -11,13 +11,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <application
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:replace="android:allowBackup"
         android:name=".MyApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
@@ -36,10 +38,12 @@
         <activity android:name=".ui.main.MainActivity" />
         <activity android:name=".ui.particulars.ParticularsActivity" />
         <activity android:name=".ui.download.DownLoadActivity" />
+        <activity android:name=".ui.look.LookActivity"
+            android:theme="@style/LookTheme"></activity>
 
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="59681991e88bad15ac00126b"></meta-data>
+            android:value="59681991e88bad15ac00126b" />
 
         <activity
             android:name="com.umeng.socialize.media.WBShareCallBackActivity"
@@ -81,7 +85,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
     </application>
 
 </manifest>

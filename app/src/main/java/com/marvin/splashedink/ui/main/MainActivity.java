@@ -72,6 +72,8 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     protected void dataInit() {
         data = new ArrayList<>();
         mainAdapter = new MainAdapter(this, R.layout.main_item, data);
+        mainAdapter.setEnableLoadMore(true);
+        mainAdapter.openLoadAnimation();
 
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setAdapter(mainAdapter);

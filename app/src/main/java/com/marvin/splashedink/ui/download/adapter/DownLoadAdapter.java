@@ -1,20 +1,33 @@
 package com.marvin.splashedink.ui.download.adapter;
 
-import android.app.DownloadManager;
-import android.content.Context;
-import android.database.Cursor;
+import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.bean.DiskDownloadBean;
+import com.marvin.splashedink.common.BuildConfig;
+import com.marvin.splashedink.ui.download.DownLoadActivity;
+import com.marvin.splashedink.ui.look.LookActivity;
+import com.marvin.splashedink.utils.ToastUtil;
 import com.orhanobut.logger.Logger;
 
 import java.util.List;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import zlc.season.rxdownload2.RxDownload;
+import zlc.season.rxdownload2.entity.DownloadFlag;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -23,49 +36,88 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
  */
 
 public class DownLoadAdapter extends BaseQuickAdapter<DiskDownloadBean, BaseViewHolder> {
-    private Context context;
+    private DownLoadActivity activity;
 
-    public DownLoadAdapter(Context context, @LayoutRes int layoutResId, @Nullable List<DiskDownloadBean> data) {
+    public DownLoadAdapter(DownLoadActivity activity, @LayoutRes int layoutResId, @Nullable List<DiskDownloadBean> data) {
         super(layoutResId, data);
-        this.context = context;
+        this.activity = activity;
     }
 
     @Override
     protected void convert(BaseViewHolder helper, DiskDownloadBean item) {
         helper.setText(R.id.text_photo_id, item.getPhoto_id());
-        Glide.with(context)
+        Glide.with(activity)
                 .load(item.getPreview_url())
                 .transition(withCrossFade())
                 .into((ImageView) helper.getView(R.id.background));
-        long download_id = item.getDownload_id();
-        query(download_id);
+
+        ImageView iv_down_status = helper.getView(R.id.iv_down_status);
+        ImageView iv_down_reset_look = helper.getView(R.id.iv_down_reset_look);
+        //接收事件可以在任何地方接收，不管该任务是否开始下载均可接收.
+        Disposable disposable = RxDownload.getInstance(activity).receiveDownloadStatus(item.getUrl())
+                .subscribe(event -> {
+                    //当事件为Failed时, 才会有异常信息, 其余时候为null.
+                    if (event.getFlag() == DownloadFlag.FAILED) {
+                        Throwable throwable = event.getError();
+                        Logger.w("Error", throwable);
+                    }
+                    if (event.getDownloadStatus().getFormatDownloadSize().equalsIgnoreCase(event.getDownloadStatus().getFormatTotalSize())) {
+                        helper.setText(R.id.text_photo_id, item.getPhoto_id());
+                        iv_down_status.setBackgroundResource(R.drawable.download_complete);
+                        iv_down_reset_look.setBackgroundResource(R.drawable.download_look);
+                        iv_down_reset_look.setTag(true);
+                    } else {
+                        helper.setText(R.id.text_photo_id, item.getPhoto_id() + ":" + event.getDownloadStatus().getPercent());
+                        iv_down_status.setBackgroundResource(R.drawable.download_midway);
+                        iv_down_reset_look.setBackgroundResource(R.drawable.download_reset);
+                        iv_down_reset_look.setTag(false);
+                    }
+                });
+        helper.getView(R.id.iv_down_reset_look).setOnClickListener(new adapterItemOnClick(item.getUrl(), item.getPhoto_id()));
+        helper.getView(R.id.iv_down_close).setOnClickListener(new adapterItemOnClick(item.getUrl(), item.getPhoto_id()));
+        RxDownload.getInstance(activity).getTotalDownloadRecords();
     }
 
-    // 查询下载进度，文件总大小多少，已经下载多少
-    private void query(long id) {
-        DownloadManager.Query downloadQuery = new DownloadManager.Query();
-        downloadQuery.setFilterById(id);
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        Cursor cursor = downloadManager.query(downloadQuery);
-        if (cursor != null && cursor.moveToFirst()) {
-            int fileName = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
-            int fileUri = cursor.getColumnIndex(DownloadManager.COLUMN_URI);
-            String fn = cursor.getString(fileName);
-            String fu = cursor.getString(fileUri);
+    public class adapterItemOnClick implements View.OnClickListener {
+        private String url;
+        private String id;
 
-            int totalSizeBytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
-            int bytesDownloadSoFarIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+        public adapterItemOnClick(String url, String id) {
+            this.url = url;
+            this.id = id;
+        }
 
-            // 下载的文件总大小
-            int totalSizeBytes = cursor.getInt(totalSizeBytesIndex);
-
-            // 截止目前已经下载的文件总大小
-            int bytesDownloadSoFar = cursor.getInt(bytesDownloadSoFarIndex);
-
-            Logger.d(this.getClass().getName(),
-                    "from " + fu + " 下载到本地 " + fn + " 文件总大小:" + totalSizeBytes + " 已经下载:" + bytesDownloadSoFar);
-
-            cursor.close();
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.iv_down_reset_look:
+                    if (Boolean.valueOf(view.getTag().toString())) {
+                        Intent intent = new Intent(activity, LookActivity.class);
+                        intent.putExtra("PHOTO_PATH", BuildConfig.AppDir + "/Download/" + id + ".jpg");
+                        activity.startActivity(intent);
+                    } else {
+                        RxDownload.getInstance(activity)
+                                .serviceDownload(url, id + ".jpg")
+                                .subscribe((Consumer<Object>) o -> {
+                                    ToastUtil.getInstance(activity)
+                                            .setDuration(Toast.LENGTH_SHORT)
+                                            .setText("任务已加入下载队列")
+                                            .show();
+                                });
+                    }
+                    break;
+                case R.id.iv_down_close:
+                    RxDownload.getInstance(activity).deleteServiceDownload(url, true).subscribe();
+                    RealmResults<DiskDownloadBean> results = Realm.getDefaultInstance().where(DiskDownloadBean.class)
+                            .in("url", new String[]{url})
+                            .findAll();
+                    Realm.getDefaultInstance().executeTransaction(realm -> {
+                        results.deleteAllFromRealm();
+                    });
+                    activity.getDiskDownloads();
+                    break;
+            }
         }
     }
 }

@@ -4,10 +4,13 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
 
+import com.orhanobut.logger.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * SD卡相关的辅助类
@@ -89,19 +92,27 @@ public class SDCardUtil {
         if (!filedir.exists()) {
             filedir.mkdirs();
         }
+        FileOutputStream outputstream = null;
         try {
             jsonfile.createNewFile();
             if (isSDCardEnable()) {
-                FileOutputStream outputstream = new FileOutputStream(jsonfile);
+                outputstream = new FileOutputStream(jsonfile);
                 byte[] buffer = content.getBytes();
                 outputstream.write(buffer);
                 outputstream.flush();
-                outputstream.close();
                 //Toast.makeText(context, "文件写入成功", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception ex) {
             //Toast.makeText(context, "文件写入失败", Toast.LENGTH_SHORT).show();
-            //LogUtil.d(ex.toString());
+            Logger.d(ex.toString());
+        } finally {
+            if(outputstream != null) {
+                try {
+                    outputstream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
