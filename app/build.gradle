@@ -91,9 +91,3 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
 }
-repositories {
-    mavenCentral()
-}
-repositories {
-    mavenCentral()
-}
