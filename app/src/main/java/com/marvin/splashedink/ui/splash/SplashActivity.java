@@ -8,7 +8,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.marvin.splashedink.R;
-import com.marvin.splashedink.ui.kotlin.KotlinActivity;
 import com.marvin.splashedink.ui.main.MainActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -23,7 +22,6 @@ public class SplashActivity extends AppCompatActivity {
                 .into(splash_image);
         new Handler().postDelayed(() -> {
             Intent intent = new Intent(this, MainActivity.class);
-//            Intent intent = new Intent(this, KotlinActivity.class);
             startActivity(intent);
             finish();
         }, 2000);
