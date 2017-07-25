@@ -13,15 +13,14 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
-    <application
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:replace="android:allowBackup"
+    <application xmlns:tools="http://schemas.android.com/tools"
         android:name=".MyApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
         <meta-data
             android:name="com.marvin.splashedink.utils.glide.MyGlideModule"
             android:value="GlideModule" />
@@ -38,8 +37,9 @@
         <activity android:name=".ui.main.MainActivity" />
         <activity android:name=".ui.particulars.ParticularsActivity" />
         <activity android:name=".ui.download.DownLoadActivity" />
-        <activity android:name=".ui.look.LookActivity"
-            android:theme="@style/LookTheme"></activity>
+        <activity
+            android:name=".ui.look.LookActivity"
+            android:theme="@style/LookTheme" />
 
         <meta-data
             android:name="UMENG_APPKEY"
@@ -85,6 +85,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity android:name=".ui.kotlin.KotlinActivity"></activity>
     </application>
 
 </manifest>
