@@ -29,7 +29,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import zlc.season.rxdownload2.RxDownload;
-import zlc.season.rxdownload2.entity.DownloadStatus;
 
 import static android.R.attr.id;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;

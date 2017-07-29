@@ -131,7 +131,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
             } else {
                 mainAdapter.addData(data);
             }
-            if (data.size() < 10) {
+            if (data.size() < 20) {
                 mainAdapter.loadMoreEnd();
             } else {
                 mainAdapter.loadMoreComplete();

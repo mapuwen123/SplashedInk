@@ -15,7 +15,6 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -24,7 +23,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.marvin.splashedink.R;
 import com.marvin.splashedink.base.BaseActivity;
 import com.marvin.splashedink.bean.DiskDownloadBean;
-import com.marvin.splashedink.utils.ToastUtil;
 import com.marvin.splashedink.widget.ParallaxScrollView;
 
 import java.io.IOException;
@@ -34,10 +32,8 @@ import io.reactivex.functions.Consumer;
 import io.realm.Realm;
 import zlc.season.rxdownload2.RxDownload;
 
-import static android.R.attr.bitmap;
 import static android.R.attr.id;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.umeng.socialize.utils.DeviceConfig.context;
 
 public class ParticularsActivity extends BaseActivity<ParticularsView, ParticularsPresenter> implements ParticularsView,
         ParallaxScrollView.ScrollviewListener,
@@ -146,7 +142,7 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
     protected void dataInit() {
         photo_id = getIntent().getStringExtra("PHOTO_ID");
         height = getIntent().getIntExtra("HEIGHT", 0);
-        image_url = getIntent().getStringExtra("IMAGE_URL");
+        image_url = getIntent().getStringExtra("image_url");
 
         manager = WallpaperManager.getInstance(this);
 
@@ -276,9 +272,7 @@ public class ParticularsActivity extends BaseActivity<ParticularsView, Particula
     public void setDownloadUrl(String url) {
         RxDownload.getInstance(this)
                 .serviceDownload(url, photo_id + ".jpg")
-                .subscribe((Consumer<Object>) o -> {
-                    showToast("任务已加入下载队列");
-                });
+                .subscribe((Consumer<Object>) o -> showToast("任务已加入下载队列"));
         Realm.getDefaultInstance().executeTransactionAsync(realm -> {
             DiskDownloadBean diskDownloadBean = realm.createObject(DiskDownloadBean.class);
             diskDownloadBean.setDownload_id(id);

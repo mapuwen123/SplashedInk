@@ -3,7 +3,6 @@ package com.marvin.splashedink.ui.main;
 
 import com.marvin.splashedink.MyApplication;
 import com.marvin.splashedink.bean.PhotoBean;
-import com.marvin.splashedink.common.APIConfig;
 
 import java.util.List;
 
